@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+function help()
+{
+    echo "Usage:$0 poems.txt"
+}
+
 function stripTag()
 {
     sed 's/<[^>]*>//g'
@@ -40,17 +45,14 @@ function convertPoemText()
 function fetchPoem()
 {
     PoemTitle="$1"
-    Poem=$(curl -s "https://so.gushiwen.org/search.aspx?value=${PoemTitle}"|grep 'textarea'|head -n 1|stripTag |sed 's/http.*$//')
+    Poem=$(curl -Ls "https://so.gushiwen.org/search.aspx?value=${PoemTitle}"|grep 'textarea'|head -n 1|stripTag |sed 's/http.*$//')
     PoemText=$(echo ${Poem}|sed 's/——.*//')
     PoemAuthor=$(echo ${Poem}|sed 's/.*——//'|sed 's/《.*//')
     echo -n "${PoemTitle}|${PoemAuthor}|"
     echo ${PoemText} |convertPoemText
 }
 
-# word2pinyin "，"
-fetchPoem "$1"
-
-# echo "头上红冠不用裁
-# 满身雪白走将来
-# 平生不敢轻言语
-# 一叫千门万户开" |convertPoemText
+cat "$1" |while read poem
+do
+    fetchPoem "$poem"
+done
