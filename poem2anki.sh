@@ -45,11 +45,47 @@ function convertPoemText()
 function fetchPoem()
 {
     PoemTitle="$1"
-    Poem=$(curl -Ls "https://so.gushiwen.org/search.aspx?value=${PoemTitle}"|grep 'textarea'|head -n 1|stripTag |sed 's/http.*$//')
-    PoemText=$(echo ${Poem}|sed 's/——.*//')
-    PoemAuthor=$(echo ${Poem}|sed 's/.*——//'|sed 's/《.*//')
+    PoemInfo="$(fetchPoemInfo ${PoemTitle})"
+    PoemAuthor="$(extractPoemAuthor "${PoemInfo}")"
+    PoemContent="$(extractPoemContent "${PoemInfo}")"
+    formatPoemForAnki "${PoemTitle}" "${PoemAuthor}" "${PoemContent}"
+}
+
+function fetchPoemInfo
+{
+    PoemTitle="$1"
+    curl -Ls -G --data-urlencode "value=${PoemTitle}" "https://so.gushiwen.org/search.aspx"|grep 'textarea'|head -n 1|stripTag |sed 's/http.*$//'
+}
+
+function extractPoemAuthor()
+{
+    PoemInfo="$1"
+    echo "${PoemInfo}"|sed 's/.*——//'|sed 's/《.*//'
+}
+
+function extractPoemContent()
+{
+    PoemInfo="$1"
+    echo "${PoemInfo}"|sed 's/——.*//'
+}
+
+function formatPoemForAnki()
+{
+    PoemTitle="$1"
+    PoemAuthor="$2"
+    PoemContent="$3"
+    # echo "PoemTitle"
+    # echo "${PoemTitle}"
+    # echo "PoemInfo"
+    # echo "${PoemInfo}"
+    # echo "PoemAuthor"
+    # echo "${PoemAuthor}"
+    # echo "PoemContent"
+    # echo "${PoemContent}"
     echo -n "${PoemTitle}|${PoemAuthor}|"
-    echo ${PoemText} |convertPoemText
+    echo ${PoemContent} |convertPoemText
+    echo 
+    
 }
 
 cat "$1" |while read poem
