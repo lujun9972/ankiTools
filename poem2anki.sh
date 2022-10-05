@@ -88,7 +88,11 @@ function formatPoemForAnki()
     
 }
 
-cat "$1" |while read poem
-do
-    fetchPoem "$poem"
-done
+if [[ $# -eq 3 ]];then
+   formatPoemForAnki "$1" "$2" "$(cat $3)"
+   else
+   cat "$1" |while read poem
+   do
+     fetchPoem "$poem"
+   done
+fi
